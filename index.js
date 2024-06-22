@@ -12,13 +12,13 @@ dotenv.config();
 const app = express();
 const port = process.env.PORT || 3000;
 const MONGO_URI = process.env.MONGO_URI;
-
+const origin = process.env.ORIGIN;
 // Middleware
 app.use(express.json());
 app.use(express.static('public'));
 
 const corsOptions = {
-  origin: 'http://localhost:5173',
+  origin:  origin,
 };
 
 app.use(cors(corsOptions));
