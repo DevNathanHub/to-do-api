@@ -143,9 +143,28 @@ app.get('/api/todos', verifyToken, async (req, res) => {
 
 app.put('/api/todos/:id', verifyToken, async (req, res) => {
   const { title, description, completed } = req.body;
-  
 
   try {
+    let updatedTitle = title;
+    let updatedDescription = description;
+
+    if (!title) {
+      const existingTodo = await Todo.findById(req.params.id);
+      if (!existingTodo) {
+        return res.status(404).json({ error: 'Todo not found' });
+      }
+      updatedTitle = existingTodo.title;
+    }
+
+    if (!description) {
+      const existingTodo = await Todo.findById(req.params.id);
+      if (!existingTodo) {
+        return res.status(404).json({ error: 'Todo not found' });
+      }
+      updatedDescription = existingTodo.title;
+    }
+
+  
     const updatedTodo = await Todo.findOneAndUpdate(
       { _id: req.params.id, createdBy: req.body.userId },
       { title, description, completed },
@@ -163,6 +182,7 @@ app.put('/api/todos/:id', verifyToken, async (req, res) => {
 });
 
 app.delete('/api/todos/:id', verifyToken, async (req, res) => {
+ 
   try {
     const deletedTodo = await Todo.findOneAndDelete({ _id: req.params.id, createdBy: req.body.userId });
 
