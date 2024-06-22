@@ -5,8 +5,8 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const User = require('./models/User');
 const Todo = require('./models/Todo');
-const sanitizedUser = require('./utils/sanitizer');
 const sanitizeUser = require('./utils/sanitizer');
+const cors = require('cors');
 
 dotenv.config();
 const app = express();
@@ -16,6 +16,12 @@ const MONGO_URI = process.env.MONGO_URI;
 // Middleware
 app.use(express.json());
 app.use(express.static('public'));
+
+const corsOptions = {
+  origin: 'http://localhost:5173',
+};
+
+app.use(cors(corsOptions));
 
 // Connect to MongoDB
 mongoose.connect(MONGO_URI, {
@@ -108,13 +114,13 @@ app.get('/api/todos', verifyToken, async (req, res) => {
 });
 
 app.post('/api/todos', verifyToken, async (req, res) => {
-  const { title, description } = req.body;
+ const { title, description } = req.body;
 
   try {
     const newTodo = new Todo({
       title,
       description,
-      createdBy: req.userId,
+      createdBy: req.body.userId,
     });
 
     await newTodo.save();
@@ -123,6 +129,17 @@ app.post('/api/todos', verifyToken, async (req, res) => {
     res.status(400).json({ error: err.message });
   }
 });
+
+// Get all todos
+app.get('/api/todos', verifyToken, async (req, res) => {
+  try {
+    const todos = await Todo.find({ createdBy: req.body.userId });
+    res.status(200).json(todos);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 
 app.put('/api/todos/:id', verifyToken, async (req, res) => {
   const { title, description, completed } = req.body;
