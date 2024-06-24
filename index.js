@@ -49,7 +49,6 @@ app.post('/api/signup', async (req, res) => {
       fullName,
       email,
       password,
-      todos: []
     });
 
     await newUser.save();
